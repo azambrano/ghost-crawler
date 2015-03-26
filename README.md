@@ -5,7 +5,7 @@ Ghost Crawler is a .NET library based on AngleSharp that gives you the ability t
 Documentation
 ==========
 
-In the most simple case you only need to extrac a simple data:
+In the most simple case you only need to extract a simple data:
 
 ```c#
 
