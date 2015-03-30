@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Data;
 using System.Linq;
 
@@ -15,6 +16,23 @@ namespace GhostCrawler.DataSelector
             SetDocument(htmlDocument);
         }
 
+		public NameValueCollection TryGetFromData(string formName = "")
+        {
+            var result = new NameValueCollection();
+            var doc = _htmlDocument as DocElement;
+            if (doc != null)
+            {
+                var forms = string.IsNullOrWhiteSpace(formName) ? doc.Forms().ToList() : doc.Forms().Where(x => x.Name == formName).ToList();
+                foreach (var formElement in forms)
+                {
+                    foreach (var element in formElement.GetDataPointElements())
+                        if (!string.IsNullOrWhiteSpace(element.Name))
+                            result.Add(element.Name, element.GetStringValue());
+                }
+            }
+            return result;
+        }
+		
         public void SetDocument(WebElement document)
         {
             _htmlDocument = document;
@@ -73,74 +91,9 @@ namespace GhostCrawler.DataSelector
                 {
                     /*Header*/
                     ResolveHeader(dataTable);
-                    //if (!(bool)dataTable.ExtendedProperties["_HeaderIsComplete_"])
-                    //{
-                    //    foreach (var rowDefinition in setting.ColumnDefinitions)
-                    //    {
-                    //        var columnData = dataTable.Columns[rowDefinition.Key.ToString()];
-                    //        if (rowDefinition.IsHeaderSelector)
-                    //        {
-                    //            var el = _browser.HtmlDocument.GetElementByQuery(rowDefinition.Header);
-                    //            if (el != null)
-                    //                columnData.Caption = el.GetStringValue();
-                    //        }
-                    //        else
-                    //            columnData.Caption = rowDefinition.Header;
-                    //    }
-                    //    dataTable.ExtendedProperties["_HeaderIsComplete_"] = true;
-                    //}
+                    
                     /*Values*/
-                    ResolveData(dataTable);
-                    //if (!setting.MultipleRecords)
-                    //{
-                    //    var rowData = dataTable.NewRow();
-                    //    foreach (var rowDefinition in setting.ColumnDefinitions)
-                    //    {
-                    //        if (rowDefinition.IsCellSelector)
-                    //        {
-                    //            var elScope = FindScopeElement(rowDefinition.CellScope, _browser.HtmlDocument);
-                    //            if (elScope != null)
-                    //            {
-                    //                var el = _browser.HtmlDocument.GetElementByQuery(rowDefinition.Cell);
-                    //                if (el != null)
-                    //                    rowData[rowDefinition.Key.ToString()] = el.GetStringValue();
-                    //            }
-                    //        }
-                    //        else
-                    //            rowData[rowDefinition.Key.ToString()] = rowDefinition.Cell;
-                    //    }
-                    //    dataTable.Rows.Add(rowData);
-                    //}
-                    //else
-                    //{
-                    //    var scope = FindScopeElement(setting.Scope, _browser.HtmlDocument);
-                    //    if (scope != null)
-                    //    {
-                    //        var records = scope.GetElementsByQuery(setting.RepeatablePattern);
-                    //        if (records != null && records.Any())
-                    //            foreach (var webElement in records)
-                    //            {
-                    //                var rowData = dataTable.NewRow();
-                    //                foreach (var rowDefinition in setting.ColumnDefinitions)
-                    //                {
-                    //                    if (rowDefinition.IsCellSelector)
-                    //                    {
-                    //                        //var el = webElement.GetElementByQuery(rowDefinition.Cell);
-                    //                        var elScope = FindScopeElement(rowDefinition.CellScope, webElement);
-                    //                        if (elScope != null)
-                    //                        {
-                    //                            var el = elScope.GetElementByQuery(rowDefinition.Cell);
-                    //                            if (el != null)
-                    //                                rowData[rowDefinition.Key.ToString()] = el.GetStringValue();
-                    //                        }
-                    //                    }
-                    //                    else
-                    //                        rowData[rowDefinition.Key.ToString()] = rowDefinition.Cell;
-                    //                }
-                    //                dataTable.Rows.Add(rowData);
-                    //            }
-                    //    }
-                    //}
+                    ResolveData(dataTable);                   
                 }
             }
         }

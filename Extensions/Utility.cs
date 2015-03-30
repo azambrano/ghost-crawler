@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -7,6 +8,13 @@ namespace GhostCrawler.Extensions
 {
     public static class Utility
     {
+        public static string GetValueOrDefault(this Dictionary<string, string> src, string key)
+        {
+            if (src.ContainsKey(key))
+                return src[key];
+            return null;
+        }
+
         public static byte[] ToCSV(this DataTable dtDataTable)
         {
             var ms = new MemoryStream();

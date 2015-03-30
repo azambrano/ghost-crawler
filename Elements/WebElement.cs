@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using GhostCrawler.Extensions;
 namespace GhostCrawler
 {
     public class WebElement
@@ -13,6 +13,7 @@ namespace GhostCrawler
         {
             _setter = setter;
             Key = Guid.NewGuid();
+            Attributes = new Dictionary<string, string>();
         }
 
         #region properties..
@@ -31,7 +32,13 @@ namespace GhostCrawler
 
         public string TagName { get; set; }
 
-        public string XPath { get; set; }
+        public string Name
+        {
+            get
+            {
+                return Attributes.GetValueOrDefault("name") ?? string.Empty;
+            }
+        }
 
         #endregion
 
@@ -57,7 +64,7 @@ namespace GhostCrawler
         public string GetStringValue()
         {
             if (TagName.ToLower() == "input")
-                return Attributes["value"] ?? string.Empty;
+                return Attributes.GetValueOrDefault("value") ?? string.Empty;
 
             if (TagName.ToLower() == "select")
                 return string.Empty;

@@ -40,7 +40,7 @@ namespace GhostCrawler
         {
             return Task.Factory.StartNew(() =>
             {
-                var html = _webClient.UploadString(url, "POST", parameters);                
+                var html = _webClient.UploadString(url, "POST", parameters);
                 return ParseDocument(html, url);
             });
         }
@@ -63,6 +63,13 @@ namespace GhostCrawler
         public byte[] DownloadFile(string url)
         {
             return _webClient.DownloadData(url);
+        }
+
+
+        public WebElement GoToUrl(Uri url)
+        {
+            var html = _webClient.DownloadString(url);
+            return ParseDocument(html, url);
         }
 
         public WebElement Post(NameValueCollection parameters)
@@ -93,7 +100,7 @@ namespace GhostCrawler
         private WebElement ParseDocument(string html, Uri page)
         {
             var parser = _browser.GetParser();
-            var htmlWithScripts = ScriptingParser.Execute(html, parser, page);
+            var htmlWithScripts = ScriptingParser.Execute(html, parser, page, _webClient.CookieContainer);
             parser.Load(htmlWithScripts);
             return parser.Document;
         }

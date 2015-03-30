@@ -29,17 +29,18 @@ namespace GhostCrawler
 
         private void Initialize(WebClientExtended wc)
         {
+            Headers = new WebHeaderCollection();
             UserAgent = "User-Agent	Mozilla/5.0 (Windows NT 6.3; WOW64; rv:35.0) Gecko/20100101 Firefox/35.0";
             HtmlEncoding = Encoding.UTF8;
 
             _navigation = new NavigationHandle(this, wc);
             _navigation.OnFinishedNavigation += (s, html) =>
             {
-                Page = _webClient.ResponseUri;                
-                var htmlWithScripts = ScriptingParser.Execute(html, Parser, Page);
+                Page = _webClient.ResponseUri;
+                var htmlWithScripts = ScriptingParser.Execute(html, Parser, Page, _webClient.CookieContainer);
                 TextDocument = htmlWithScripts;
                 Parser.Load(TextDocument);
-                HtmlDocument= Parser.Document;                                
+                HtmlDocument = Parser.Document;
             };
         }
 
@@ -73,8 +74,8 @@ namespace GhostCrawler
                 foreach (var key in Headers.AllKeys)
                     if (wc.Headers.AllKeys.All(x => x != key))
                         wc.Headers.Add(key, Headers[key]);
-            
-            return  new StandAloneNavigationHandle(this, wc);
+
+            return new StandAloneNavigationHandle(this, wc);
         }
 
         public DataSelectorManager DataSelector(WebElement document)
@@ -111,7 +112,7 @@ namespace GhostCrawler
 
         internal IParserProvider GetParser()
         {
-            var p = new AngleSharpProvider();            
+            var p = new AngleSharpProvider();
             return p;
         }
 
@@ -132,7 +133,7 @@ namespace GhostCrawler
 
         public void Dispose()
         {
-            _webClient.Dispose();            
+            _webClient.Dispose();
             if (GhostConfiguration.ScriptEngine != null)
                 GhostConfiguration.ScriptEngine.Dispose();
         }

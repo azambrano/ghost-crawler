@@ -21,9 +21,9 @@ namespace GhostCrawler.Parsers
         }
 
         public void Load(string html)
-        {         
+        {
             _document = _builder.FromHtml(html);
-            Document = Map(_document.DocumentElement);
+            Document = MapDoc(_document);
         }
 
         public WebElement GetElementById(string value)
@@ -63,7 +63,50 @@ namespace GhostCrawler.Parsers
                 TagName = node.TagName,
                 Text = node.TextContent,
                 InnerHtml = node.InnerHtml,
-                OuterHtml = node.OuterHtml               
+                OuterHtml = node.OuterHtml
+            };
+
+            el.OnQuerySelector(query => Map(node.QuerySelector(query)));
+            el.OnQuerySelectorAll(query => node.QuerySelectorAll(query).Select(Map));
+
+            return el;
+        }
+
+        private static FormElement FormMap(IElement node)
+        {
+            if (node == null)
+                return null;
+
+            var el = new FormElement(value => node.SetAttribute("value", value))
+            {
+                Attributes = node.Attributes.ToDictionary(x => x.Name, y => y.Value),
+                TagName = node.TagName,
+                Text = node.TextContent,
+                InnerHtml = node.InnerHtml,
+                OuterHtml = node.OuterHtml
+            };
+
+            el.OnQuerySelector(query => Map(node.QuerySelector(query)));
+            el.OnQuerySelectorAll(query => node.QuerySelectorAll(query).Select(Map));
+
+            return el;
+        }
+
+        private static DocElement MapDoc(IDocument doc)
+        {
+            var node = doc.DocumentElement;
+            if (node == null)
+                return null;
+            
+           var el = new DocElement(value => node.SetAttribute("value", value), doc.Forms.Select(FormMap))
+            {
+                Attributes = node.Attributes.ToDictionary(x => x.Name, y => y.Value),
+                TagName = node.TagName,
+                Text = node.TextContent,
+                InnerHtml = node.InnerHtml,
+                OuterHtml = node.OuterHtml,
+                Domain = doc.Domain,
+                Title = doc.Title
             };
 
             el.OnQuerySelector(query => Map(node.QuerySelector(query)));
